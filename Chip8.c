@@ -164,6 +164,7 @@ void EmulateChip8Operation(Chip8State* state)
 				uint16_t value = *op & 0x0f;
 				value = value << 8;
 				value = value | (*(op + 1));
+				value = value & 0x0fff; // forcing I to remain within memory space
 				state->I = value;
 				state->PC += 2;
 			}
@@ -172,7 +173,10 @@ void EmulateChip8Operation(Chip8State* state)
 		case 0x0b: // JP Vx, nnn (jump to location equal to sum of Vx and nnn)
 			{
 				uint16_t reg0val = state->V[0];
-				uint16_t target = (*op & 0x0f << 8) | (*(op + 1));
+				uint16_t target = (*op & 0x0f);
+				target = target << 8;
+				target = target | (*(op + 1) & 0xff);
+				target = target & 0x0fff; // forcing pc to remain within memory space
 				state->PC = (reg0val + target);
 			}
 			break;
